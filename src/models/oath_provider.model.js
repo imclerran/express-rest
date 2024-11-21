@@ -1,6 +1,15 @@
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize) => {
+  /**
+   * Sequelize model representing refresh tokens used in authentication.
+   * @typedef {import('sequelize').Model} RefreshToken
+   * @property {number} id - The primary key for the refresh token.
+   * @property {string} token - The unique refresh token string.
+   * @property {number} userId - Foreign key referencing the user who owns this refresh token.
+   * @property {Date} createdAt - Timestamp of when the refresh token was created.
+   * @property {Date} updatedAt - Timestamp of when the refresh token was last updated.
+   */
   const RefreshToken = sequelize.define('RefreshToken', {
     id: {
       type: DataTypes.INTEGER,
