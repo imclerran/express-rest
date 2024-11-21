@@ -191,7 +191,7 @@ const revokeToken = async (req, res) => {
     }
 
     // Verify the refresh token
-    const decoded = jwt.verify(refreshToken, JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
     const tokenEntry = await RefreshToken.findOne({ where: { token: refreshToken } });
 
     if (!tokenEntry) {
