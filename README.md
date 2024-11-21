@@ -10,7 +10,6 @@ This repository is a learning exercise for me as I explore building RESTful APIs
 1) Node and Express basics
     - routes
     - controllers
-    - middleware
 2) ORM - Sequelize
     - db connections
     - models
@@ -19,8 +18,9 @@ This repository is a learning exercise for me as I explore building RESTful APIs
     - password hashing
     - jwt auth
     - sliding refresh tokens
-4) Custom middleware
+4) Middleware
     - validation
+    - rate limiting
 
 
 [nodejs_badge]: https://img.shields.io/badge/Node.js-0D121C?logo=nodedotjs&logoColor=5FA04E
