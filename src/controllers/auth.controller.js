@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
-const RefreshToken = require('../models/refresh_token.model');
-const User = require('../models/user.model');
+const db = require('../models');
+const User = db.User;
+const RefreshToken = db.RefreshToken;
 const { hashPassword, verifyPassword } = require('../utils/password');
-const { JWT_SECRET, JWT_EXPIRATION, REFRESH_TOKEN_EXPIRATION } = process.env;
+const { JWT_SECRET, JWT_REFRESH_SECRET, JWT_EXPIRATION, REFRESH_TOKEN_EXPIRATION } = process.env;
 
 /**
  * Handles user registration.
@@ -88,7 +89,7 @@ const loginUser = async (req, res) => {
     // Generate refresh token
     const refreshToken = jwt.sign(
       { userId: user.id },
-      JWT_SECRET,
+      JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRATION }
     );
 
@@ -120,41 +121,50 @@ const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
+    console.log('Refresh token is required');
     return res.status(400).json({ error: 'Refresh token is required' });
   }
 
   try {
     // Verify the refresh token
+    console.log("Verifying token...")
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    console.log('Decoded:', decoded);
 
     // Check if the refresh token exists in the database and is valid
     const storedToken = await RefreshToken.findOne({ where: { token: refreshToken } });
     if (!storedToken) {
+      console.log('Refresh token not found');
       return res.status(403).json({ error: 'Invalid refresh token' });
     }
 
+    console.log("generating new access token...")
     // Generate a new access token
     const newAccessToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
-      process.env.JWT_SECRET,
+      process.env.JWT_REFRESH_SECRET,
       { expiresIn: '15m' } // Short-lived access token
     );
 
+    console.log("generating new refresh token...")
     // Generate a new refresh token with a reset expiration
     const newRefreshToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
-      process.env.JWT_REFRESH_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: '30d' } // Extend the sliding expiration
     );
 
+    console.log("saving new refresh token...")
     // Save the new refresh token in the database and remove the old one
     await RefreshToken.create({
       token: newRefreshToken,
       userId: decoded.id,
     });
 
+    console.log("removing old refresh token...")
     await storedToken.destroy(); // Remove the old token
 
+    console.log("returning new tokens...")
     // Return the new tokens to the client
     res.json({
       accessToken: newAccessToken,
