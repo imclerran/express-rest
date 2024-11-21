@@ -26,8 +26,8 @@ const getUserDetails = async (req, res) => {
 };
 
 const updateUserDetails = async (req, res) => {
-  const userId = req.user.id; // Provided by authenticateJWT middleware
-  const { email, name, password } = req.body;
+  const userId = req.user.id;
+  const { currentPassword, newPassword, name, email } = req.body;
 
   try {
     const user = await User.findByPk(userId);
@@ -36,13 +36,26 @@ const updateUserDetails = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Update fields only if provided
-    if (email) user.email = email;
-    if (name) user.name = name;
-    if (password) {
+    // Handle password update only if newPassword is provided
+    if (newPassword) {
+      if (!currentPassword) {
+        return res
+          .status(400)
+          .json({ error: 'Current password is required to update password' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isMatch) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+
       const saltRounds = 10;
-      user.passwordHash = await bcrypt.hash(password, saltRounds);
+      user.passwordHash = await bcrypt.hash(newPassword, saltRounds);
     }
+
+    // Handle other updates (name and email)
+    if (name) user.name = name;
+    if (email) user.email = email;
 
     await user.save();
 
@@ -52,6 +65,5 @@ const updateUserDetails = async (req, res) => {
     return res.status(500).json({ error: 'An error occurred while updating profile' });
   }
 };
-
 
 module.exports = { getUserDetails, updateUserDetails };

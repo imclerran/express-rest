@@ -1,5 +1,5 @@
 const express = require('express');
-const handleRequestValidation = require('../middleware/validation.middleware');
+const { loginRateLimiter } = require('../middleware/ratelimit.middleware');
 const { 
     validateRegistration, 
     validateLogin, 
@@ -15,7 +15,7 @@ const {
 const router = express.Router();
 
 router.post('/register', validateRegistration, registerUser);
-router.post('/login', validateLogin, loginUser);
+router.post('/login', validateLogin, loginRateLimiter, loginUser);
 router.post('/refresh-token', validateRefreshToken, refreshAccessToken);
 router.post('/revoke-token', validateRefreshToken, revokeToken);
 
