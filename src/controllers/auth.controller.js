@@ -88,7 +88,7 @@ const loginUser = async (req, res) => {
 
     // Generate refresh token
     const refreshToken = jwt.sign(
-      { userId: user.id },
+      { userId: user.id, email: user.email },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRATION }
     );
@@ -141,16 +141,16 @@ const refreshAccessToken = async (req, res) => {
     console.log("generating new access token...")
     // Generate a new access token
     const newAccessToken = jwt.sign(
-      { id: decoded.id, email: decoded.email },
-      process.env.JWT_REFRESH_SECRET,
+      { userId: decoded.userId, email: decoded.email },
+      process.env.JWT_SECRET,
       { expiresIn: '15m' } // Short-lived access token
     );
 
     console.log("generating new refresh token...")
     // Generate a new refresh token with a reset expiration
     const newRefreshToken = jwt.sign(
-      { id: decoded.id, email: decoded.email },
-      process.env.JWT_SECRET,
+      { userId: decoded.userId, email: decoded.email },
+      process.env.JWT_REFRESH_SECRET,
       { expiresIn: '30d' } // Extend the sliding expiration
     );
 

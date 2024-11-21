@@ -23,5 +23,9 @@ const getUserDetails = async (req, res) => {
       res.status(500).json({ error: 'An error occurred while fetching user details' });
     }
   };
+
+  updateUserDetails = async (req, res) => {
+    res.status(501).json({ error: 'Not implemented' });
+  }
   
-  module.exports = { getUserDetails };
+  module.exports = { getUserDetails, updateUserDetails };

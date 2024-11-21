@@ -1,5 +1,5 @@
 const express = require('express');
-const handleRequestValidation = require('../middleware/request.validation');
+const handleRequestValidation = require('../middleware/validation.middleware');
 const { 
     validateRegistration, 
     validateLogin, 
@@ -14,9 +14,9 @@ const {
 
 const router = express.Router();
 
-router.post('/register', validateRegistration, handleRequestValidation, registerUser);
-router.post('/login', validateLogin, handleRequestValidation, loginUser);
-router.post('/refresh-token', validateRefreshToken, handleRequestValidation, refreshAccessToken);
-router.post('/revoke-token', validateRefreshToken, handleRequestValidation, revokeToken);
+router.post('/register', validateRegistration, registerUser);
+router.post('/login', validateLogin, loginUser);
+router.post('/refresh-token', validateRefreshToken, refreshAccessToken);
+router.post('/revoke-token', validateRefreshToken, revokeToken);
 
 module.exports = router;
