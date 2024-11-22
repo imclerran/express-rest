@@ -127,18 +127,14 @@ const refreshAccessToken = async (req, res) => {
 
   try {
     // Verify the refresh token
-    console.log("Verifying token...")
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    console.log('Decoded:', decoded);
 
     // Check if the refresh token exists in the database and is valid
     const storedToken = await RefreshToken.findOne({ where: { token: refreshToken } });
     if (!storedToken) {
-      console.log('Refresh token not found');
       return res.status(403).json({ error: 'Invalid refresh token' });
     }
 
-    console.log("generating new access token...")
     // Generate a new access token
     const newAccessToken = jwt.sign(
       { userId: decoded.userId, email: decoded.email },
@@ -146,7 +142,6 @@ const refreshAccessToken = async (req, res) => {
       { expiresIn: '15m' } // Short-lived access token
     );
 
-    console.log("generating new refresh token...")
     // Generate a new refresh token with a reset expiration
     const newRefreshToken = jwt.sign(
       { userId: decoded.userId, email: decoded.email },
@@ -154,17 +149,13 @@ const refreshAccessToken = async (req, res) => {
       { expiresIn: '30d' } // Extend the sliding expiration
     );
 
-    console.log("saving new refresh token...")
     // Save the new refresh token in the database and remove the old one
     await RefreshToken.create({
       token: newRefreshToken,
       userId: decoded.id,
     });
-
-    console.log("removing old refresh token...")
     await storedToken.destroy(); // Remove the old token
 
-    console.log("returning new tokens...")
     // Return the new tokens to the client
     res.json({
       accessToken: newAccessToken,
